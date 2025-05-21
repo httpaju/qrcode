@@ -24,8 +24,8 @@ This is the backend server for an advanced QR code generator application. It pro
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/yourusername/advanced-qrcode-server.git
-   cd advanced-qrcode-server
+   git clone https://github.com/httpaju/qrcode.git
+   cd qrcode
    ```
 
 2. **Install Dependencies**:
@@ -129,4 +129,4 @@ Contributions are welcome! Please follow these steps:
 
 ## License
 
-MIT © [Your Name]
+MIT © [Ajmal]
