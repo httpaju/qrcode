@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AJ QR Code Generator</title>
+<title>Advanced QR Code Generator with Logo & Sharing</title>
 <style>
   /* Base styles for light mode */
   body {
@@ -174,7 +174,7 @@
 </head>
 <body>
 
-<h1>AJ QR Code Generator</h1>
+<h1>Advanced QR Code Generator</h1>
 
 <label>Text or URL:
   <input type="text" id="text" placeholder="Enter text or URL" />
@@ -347,3 +347,20 @@
       const res = await fetch('http://localhost:4000/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, options, imageDataUrl }),
+      });
+      if (!res.ok) throw new Error('Network error');
+      const data = await res.json();
+      if (data && data.shareUrl) {
+        shareLinkDiv.innerHTML = `Your QR code is saved. Shareable URL: <a href="${data.shareUrl}" target="_blank" rel="noopener">${data.shareUrl}</a>`;
+      } else {
+        shareLinkDiv.textContent = 'Unexpected response from server.';
+      }
+    } catch (err) {
+      shareLinkDiv.textContent = 'Error saving QR code: ' + err.message;
+    }
+  });
+</script>
+
+</body>
+</html>
