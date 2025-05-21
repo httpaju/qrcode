@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Advanced QR Code Generator with Logo & Sharing</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+  }
+  canvas {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: block;
+  }
+  label, input, select, button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+  }
+  input[type="file"] {
+    padding: 5px;
+  }
+  #shareLink {
+    margin-top: 20px;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+<h1>Advanced QR Code Generator</h1>
+
+<label>Text or URL:
+  <input type="text" id="text" placeholder="Enter text or URL" />
+</label>
+
+<label>Size (px):
+  <input type="number" id="size" value="300" min="100" max="1000" />
+</label>
+
+<label>Error Correction:
+  <select id="errorCorrection">
+    <option value="L">L - Low (7%)</option>
+    <option value="M" selected>M - Medium (15%)</option>
+    <option value="Q">Q - Quartile (25%)</option>
+    <option value="H">H - High (30%)</option>
+  </select>
+</label>
+
+<label>Dark Color:
+  <input type="color" id="colorDark" value="#000000" />
+</label>
+
+<label>Light Color:
+  <input type="color" id="colorLight" value="#ffffff" />
+</label>
+
+<label>Upload Logo (PNG/JPEG max 100KB):
+  <input type="file" id="logoInput" accept="image/png, image/jpeg" />
+</label>
+
+<button id="saveBtn">Save & Get Shareable Link</button>
+
+<canvas id="qrCanvas"></canvas>
+
+<div id="shareLink"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+  const textInput = document.getElementById('text');
+  const sizeInput = document.getElementById('size');
+  const errorInput = document.getElementById('errorCorrection');
+  const colorDarkInput = document.getElementById('colorDark');
+  const colorLightInput = document.getElementById('colorLight');
+  const logoInput = document.getElementById('logoInput');
+  const canvas = document.getElementById('qrCanvas');
+  const ctx = canvas.getContext('2d');
+  const saveBtn = document.getElementById('saveBtn');
+  const shareLinkDiv = document.getElementById('shareLink');
+
+  let logoImage = null;
+
+  logoInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) {
+      logoImage = null;
+      drawQR();
+      return;
+    }
+    if (file.size > 100 * 1024) {
+      alert('Logo max size 100KB');
+      e.target.value = '';
+      logoImage = null;
+      drawQR();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = evt => {
+      logoImage = new Image();
+      logoImage.onload = () => drawQR();
+      logoImage.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function drawQR() {
+    const text = textInput.value.trim();
+    if (!text) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    const size = parseInt(sizeInput.value) || 300;
+    canvas.width = size;
+    canvas.height = size;
+
+    const errorCorrection = errorInput.value;
+    const darkColor = colorDarkInput.value;
+    const lightColor = colorLightInput.value;
+
+    // Generate QR code model
+    const qr = qrcode(0, errorCorrection);
+    qr.addData(text);
+    qr.make();
+
+    const tileW = size / qr.getModuleCount();
+    const tileH = size / qr.getModuleCount();
+
+    // Clear canvas
+    ctx.fillStyle = lightColor;
+    ctx.fillRect(0, 0, size, size);
+
+    // Draw QR code
+    for (let row = 0; row < qr.getModuleCount(); row++) {
+      for (let col = 0; col < qr.getModuleCount(); col++) {
+        ctx.fillStyle = qr.isDark(row, col) ? darkColor : lightColor;
+        ctx.fillRect(col * tileW, row * tileH, tileW, tileH);
+      }
+    }
+
+    // Draw logo at center if available
+    if (logoImage) {
+      const logoSize = size * 0.2; // 20% of QR size
+      const x = (size - logoSize) / 2;
+      const y = (size - logoSize) / 2;
+      // Draw white rounded rect behind logo for contrast
+      const radius = 15;
+      ctx.fillStyle = lightColor;
+      roundRect(ctx, x, y, logoSize, logoSize, radius, true, false);
+
+      ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+    }
+  }
+
+  // Rounded rect helper
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    if (typeof r === 'undefined') r = 5;
+    if (typeof fill === 'undefined') fill = true;
+    if (typeof stroke === 'undefined') stroke = false;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // Draw live preview on input changes
+  [textInput, sizeInput, errorInput, colorDarkInput, colorLightInput].forEach(el => {
+    el.addEventListener('input', () => drawQR());
+  });
+
+  drawQR(); // Initial draw
+
+  // Save QR code to backend & get shareable URL
+  saveBtn.addEventListener('click', async () => {
+    const text = textInput.value.trim();
+    if (!text) {
+      alert('Please enter text or URL');
+      return;
+    }
+
+    const size = parseInt(sizeInput.value) || 300;
+    const options = {
+      errorCorrection: errorInput.value,
+      colorDark: colorDarkInput.value,
+      colorLight: colorLightInput.value,
+      size,
+    };
+
+    // Export canvas image as data URL
+    const imageDataUrl = canvas.toDataURL('image/png');
+
+    try {
+      const res = await fetch('http://localhost:4000/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, options, imageDataUrl }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const url = `${window.location.origin}/qr/${data.id}`;
+        shareLinkDiv.innerHTML = `<strong>Shareable URL:</strong> <a href="${url}" target="_blank">${url}</a>`;
+      } else {
+        alert('Save failed: ' + data.error);
+      }
+    } catch (err) {
+      alert('Error saving QR code: ' + err.message);
+    }
+  });
+</script>
+
+</body>
+</html>
