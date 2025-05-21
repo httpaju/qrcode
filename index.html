@@ -1,366 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AJ QR Code Generator</title>
-<style>
-  /* Base styles for light mode */
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 600px;
-    margin: 2rem auto 4rem;
-    padding: 1.5rem 2rem 3rem;
-    background: #fefefe;
-    color: #121212;
-    user-select: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.5s ease, color 0.5s ease;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AJ QR Code Generator</title>
+  
+  <!-- Windtail CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/windtail@0.2.1/windtail.min.css" rel="stylesheet" />
 
-  h1 {
-    font-weight: 700;
-    font-size: 2.2rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: #007acc;
-    text-shadow: 0 0 8px #007acc88;
-    transition: color 0.5s ease, text-shadow 0.5s ease;
-  }
-
-  label {
-    color: #555;
-    transition: color 0.5s ease;
-  }
-
-  input[type="text"],
-  input[type="number"],
-  select,
-  input[type="color"],
-  input[type="file"] {
-    background-color: #fff;
-    color: #121212;
-    box-shadow: inset 0 0 6px #ccc;
-    transition: background-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
-  }
-  input[type="text"]:focus,
-  input[type="number"]:focus,
-  select:focus,
-  input[type="color"]:focus,
-  input[type="file"]:focus {
-    background-color: #e6f0ff;
-    box-shadow: 0 0 8px #007acc;
-    outline: none;
-  }
-
-  button {
-    margin-top: 2rem;
-    width: 100%;
-    padding: 1rem 0;
-    background: #007acc;
-    color: #fefefe;
-    box-shadow: 0 4px 14px #007accaa;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease, transform 0.15s ease;
-  }
-  button:hover {
-    background-color: #005a99;
-    transform: translateY(-2px);
-  }
-  button:active {
-    transform: translateY(0);
-  }
-
-  canvas {
-    margin: 2rem auto 1rem;
-    border-radius: 16px;
-    background-color: #fff;
-    box-shadow: 0 0 15px #007acc99;
-    max-width: 100%;
-    display: block;
-    transition: background-color 0.5s ease, box-shadow 0.5s ease;
-  }
-
-  #shareLink {
-    margin-top: 1.5rem;
-    background-color: #e0f0ff;
-    color: #007acc;
-    padding: 1rem 1.2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: 0 0 12px #007acc66;
-    text-align: center;
-    transition: background-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
-    word-break: break-word;
-  }
-  #shareLink a {
-    color: #004a7f;
-    text-decoration: none;
-    font-weight: 700;
-    transition: color 0.5s ease;
-  }
-  #shareLink a:hover {
-    text-decoration: underline;
-  }
-
-  /* DARK MODE */
-  @media (prefers-color-scheme: dark) {
-    body {
-      background: #121212;
-      color: #eee;
+  <style>
+    /* Auto transition for bg and text colors */
+    body, input, select, button, canvas, label, a {
+      transition: background-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
     }
-    h1 {
-      color: #61dafb;
-      text-shadow: 0 0 8px #61dafb88;
-    }
-    label {
-      color: #a0a0a0;
-    }
-    input[type="text"],
-    input[type="number"],
-    select,
-    input[type="color"],
-    input[type="file"] {
-      background-color: #222;
-      color: #eee;
-      box-shadow: inset 0 0 6px #0008;
-    }
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    select:focus,
-    input[type="color"]:focus,
-    input[type="file"]:focus {
-      background-color: #2c2c2c;
-      box-shadow: 0 0 8px #61dafb;
-      outline: none;
-    }
-    button {
-      background: #61dafb;
-      color: #121212;
-      box-shadow: 0 4px 14px #61dafbaa;
-    }
-    button:hover {
-      background-color: #21a1f1;
-    }
+    
+    /* Canvas rounded with shadow */
     canvas {
-      background-color: #fff;
-      box-shadow: 0 0 15px #61dafb99;
+      border-radius: 1rem;
+      box-shadow: 0 0 15px rgb(59 130 246 / 0.5);
+      max-width: 100%;
+      display: block;
+      margin: 1.5rem auto;
+      background-color: white;
     }
-    #shareLink {
-      background-color: #1a1a1a;
-      color: #61dafb;
-      box-shadow: 0 0 12px #61dafb66;
-    }
-    #shareLink a {
-      color: #21a1f1;
-    }
-  }
 
-  /* Responsive tweaks */
-  @media (max-width: 480px) {
-    body {
-      padding: 1rem;
-      margin: 1rem auto 3rem;
+    /* Dark mode overrides */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #e0e7ff; /* light blue-ish */
+      }
+      canvas {
+        background-color: white;
+        box-shadow: 0 0 15px rgb(96 165 250 / 0.5);
+      }
+      input, select {
+        background-color: #1e293b; /* dark slate */
+        color: #e0e7ff;
+        box-shadow: inset 0 0 6px #0008;
+      }
+      input:focus, select:focus {
+        background-color: #334155;
+        box-shadow: 0 0 8px #60a5fa;
+        outline: none;
+      }
+      button {
+        background-color: #2563eb; /* blue-600 */
+        color: white;
+        box-shadow: 0 4px 14px rgb(96 165 250 / 0.7);
+      }
+      button:hover {
+        background-color: #1d4ed8; /* blue-700 */
+      }
+      label {
+        color: #a5b4fc;
+      }
+      #shareLink {
+        background-color: #1e293b;
+        color: #93c5fd;
+        box-shadow: 0 0 12px rgb(96 165 250 / 0.5);
+      }
+      #shareLink a {
+        color: #60a5fa;
+      }
     }
-    h1 {
-      font-size: 1.8rem;
-    }
-  }
-</style>
+  </style>
 </head>
-<body>
+<body class="max-w-xl mx-auto p-6 select-none">
+  <h1 class="text-3xl font-extrabold text-center mb-8 text-blue-600 drop-shadow-md">
+    AJ QR Code Generator
+  </h1>
 
-<h1>AJ QR Code Generator</h1>
+  <form id="qrForm" class="space-y-5">
+    <label class="block">
+      <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">Text or URL</span>
+      <input
+        id="text"
+        type="text"
+        placeholder="Enter text or URL"
+        class="input input-bordered w-full dark:bg-slate-700 dark:text-gray-200"
+        required
+      />
+    </label>
 
-<label>Text or URL:
-  <input type="text" id="text" placeholder="Enter text or URL" />
-</label>
+    <label class="block">
+      <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">Size (px)</span>
+      <input
+        id="size"
+        type="number"
+        value="300"
+        min="100"
+        max="1000"
+        class="input input-bordered w-full dark:bg-slate-700 dark:text-gray-200"
+      />
+    </label>
 
-<label>Size (px):
-  <input type="number" id="size" value="300" min="100" max="1000" />
-</label>
+    <label class="block">
+      <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">Error Correction</span>
+      <select
+        id="errorCorrection"
+        class="select select-bordered w-full dark:bg-slate-700 dark:text-gray-200"
+      >
+        <option value="L">L - Low (7%)</option>
+        <option value="M" selected>M - Medium (15%)</option>
+        <option value="Q">Q - Quartile (25%)</option>
+        <option value="H">H - High (30%)</option>
+      </select>
+    </label>
 
-<label>Error Correction:
-  <select id="errorCorrection">
-    <option value="L">L - Low (7%)</option>
-    <option value="M" selected>M - Medium (15%)</option>
-    <option value="Q">Q - Quartile (25%)</option>
-    <option value="H">H - High (30%)</option>
-  </select>
-</label>
+    <div class="flex gap-4">
+      <label class="flex-1 block">
+        <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">Dark Color</span>
+        <input
+          id="colorDark"
+          type="color"
+          value="#000000"
+          class="w-full h-10 cursor-pointer"
+          aria-label="Dark color"
+        />
+      </label>
 
-<label>Dark Color:
-  <input type="color" id="colorDark" value="#000000" />
-</label>
+      <label class="flex-1 block">
+        <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">Light Color</span>
+        <input
+          id="colorLight"
+          type="color"
+          value="#ffffff"
+          class="w-full h-10 cursor-pointer"
+          aria-label="Light color"
+        />
+      </label>
+    </div>
 
-<label>Light Color:
-  <input type="color" id="colorLight" value="#ffffff" />
-</label>
+    <label class="block">
+      <span class="block mb-1 font-semibold text-gray-700 dark:text-gray-300">
+        Upload Logo (PNG/JPEG max 100KB)
+      </span>
+      <input
+        id="logoInput"
+        type="file"
+        accept="image/png, image/jpeg"
+        class="file-input file-input-bordered w-full dark:bg-slate-700 dark:text-gray-200"
+      />
+    </label>
 
-<label>Upload Logo (PNG/JPEG max 100KB):
-  <input type="file" id="logoInput" accept="image/png, image/jpeg" />
-</label>
+    <button
+      id="saveBtn"
+      type="button"
+      class="btn btn-primary w-full mt-6"
+    >
+      Save & Get Shareable Link
+    </button>
+  </form>
 
-<button id="saveBtn">Save & Get Shareable Link</button>
+  <canvas id="qrCanvas" aria-label="QR Code preview"></canvas>
 
-<canvas id="qrCanvas"></canvas>
+  <div
+    id="shareLink"
+    class="mt-6 rounded-lg p-4 bg-blue-100 text-blue-700 shadow-md break-words dark:bg-slate-800 dark:text-blue-300"
+  ></div>
 
-<div id="shareLink"></div>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script>
+    const textInput = document.getElementById('text');
+    const sizeInput = document.getElementById('size');
+    const errorInput = document.getElementById('errorCorrection');
+    const colorDarkInput = document.getElementById('colorDark');
+    const colorLightInput = document.getElementById('colorLight');
+    const logoInput = document.getElementById('logoInput');
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+    const saveBtn = document.getElementById('saveBtn');
+    const shareLinkDiv = document.getElementById('shareLink');
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-<script>
-  const textInput = document.getElementById('text');
-  const sizeInput = document.getElementById('size');
-  const errorInput = document.getElementById('errorCorrection');
-  const colorDarkInput = document.getElementById('colorDark');
-  const colorLightInput = document.getElementById('colorLight');
-  const logoInput = document.getElementById('logoInput');
-  const canvas = document.getElementById('qrCanvas');
-  const ctx = canvas.getContext('2d');
-  const saveBtn = document.getElementById('saveBtn');
-  const shareLinkDiv = document.getElementById('shareLink');
+    let logoImage = null;
 
-  let logoImage = null;
-
-  logoInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) {
-      logoImage = null;
-      drawQR();
-      return;
-    }
-    if (file.size > 100 * 1024) {
-      alert('Logo max size 100KB');
-      e.target.value = '';
-      logoImage = null;
-      drawQR();
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = evt => {
-      logoImage = new Image();
-      logoImage.onload = () => drawQR();
-      logoImage.src = evt.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  function drawQR() {
-    const text = textInput.value.trim();
-    if (!text) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
-    const size = parseInt(sizeInput.value) || 300;
-    canvas.width = size;
-    canvas.height = size;
-
-    const errorCorrection = errorInput.value;
-    const darkColor = colorDarkInput.value;
-    const lightColor = colorLightInput.value;
-
-    // Generate QR code model
-    const qr = qrcode(0, errorCorrection);
-    qr.addData(text);
-    qr.make();
-
-    const tileW = size / qr.getModuleCount();
-    const tileH = size / qr.getModuleCount();
-
-    // Clear canvas
-    ctx.fillStyle = lightColor;
-    ctx.fillRect(0, 0, size, size);
-
-    // Draw QR code
-    for (let row = 0; row < qr.getModuleCount(); row++) {
-      for (let col = 0; col < qr.getModuleCount(); col++) {
-        ctx.fillStyle = qr.isDark(row, col) ? darkColor : lightColor;
-        ctx.fillRect(col * tileW, row * tileH, tileW, tileH);
+    logoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) {
+        logoImage = null;
+        drawQR();
+        return;
       }
-    }
+      if (file.size > 100 * 1024) {
+        alert('Logo max size 100KB');
+        e.target.value = '';
+        logoImage = null;
+        drawQR();
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = evt => {
+        logoImage = new Image();
+        logoImage.onload = () => drawQR();
+        logoImage.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-    // Draw logo at center if available
-    if (logoImage) {
-      const logoSize = size * 0.2; // 20% of QR size
-      const x = (size - logoSize) / 2;
-      const y = (size - logoSize) / 2;
-      // Draw white rounded rect behind logo for contrast
-      const radius = 15;
+    function drawQR() {
+      const text = textInput.value.trim();
+      if (!text) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+      const size = parseInt(sizeInput.value) || 300;
+      canvas.width = size;
+      canvas.height = size;
+
+      const errorCorrection = errorInput.value;
+      const darkColor = colorDarkInput.value;
+      const lightColor = colorLightInput.value;
+
+      // Generate QR code model
+      const qr = qrcode(0, errorCorrection);
+      qr.addData(text);
+      qr.make();
+
+      const tileW = size / qr.getModuleCount();
+      const tileH = size / qr.getModuleCount();
+
+      // Clear canvas
       ctx.fillStyle = lightColor;
-      roundRect(ctx, x, y, logoSize, logoSize, radius, true, false);
+      ctx.fillRect(0, 0, size, size);
 
-      ctx.drawImage(logoImage, x, y, logoSize, logoSize);
-    }
-  }
-
-  // Rounded rect helper
-  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-    if (typeof r === 'undefined') r = 5;
-    if (typeof fill === 'undefined') fill = true;
-    if (typeof stroke === 'undefined') stroke = false;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    if (fill) ctx.fill();
-    if (stroke) ctx.stroke();
-  }
-
-  // Draw live preview on input changes
-  [textInput, sizeInput, errorInput, colorDarkInput, colorLightInput].forEach(el => {
-    el.addEventListener('input', () => drawQR());
-  });
-
-  drawQR(); // Initial draw
-
-  // Save QR code to backend & get shareable URL
-  saveBtn.addEventListener('click', async () => {
-    const text = textInput.value.trim();
-    if (!text) {
-      alert('Please enter text or URL');
-      return;
-    }
-
-    const size = parseInt(sizeInput.value) || 300;
-    const options = {
-      errorCorrection: errorInput.value,
-      colorDark: colorDarkInput.value,
-      colorLight: colorLightInput.value,
-      size,
-    };
-
-    // Export canvas image as data URL
-    const imageDataUrl = canvas.toDataURL('image/png');
-
-    try {
-      const res = await fetch('https://qrcode-pph2.onrender.com/api/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, options, imageDataUrl }),
-      });
-      if (!res.ok) throw new Error('Network error');
-      const data = await res.json();
-      if (data && data.shareUrl) {
-        shareLinkDiv.innerHTML = `Your QR code is saved. Shareable URL: <a href="${data.shareUrl}" target="_blank" rel="noopener">${data.shareUrl}</a>`;
-      } else {
-        shareLinkDiv.textContent = 'Unexpected response from server.';
+      // Draw QR code
+      for (let row = 0; row < qr.getModuleCount(); row++) {
+        for (let col = 0; col < qr.getModuleCount(); col++) {
+          ctx.fillStyle = qr.isDark(row, col) ? darkColor : lightColor;
+          ctx.fillRect(col * tileW, row * tileH, tileW, tileH);
+        }
       }
-    } catch (err) {
-      shareLinkDiv.textContent = 'Error saving QR code: ' + err.message;
-    }
-  });
-</script>
 
+      // Draw logo at center if available
+      if (logoImage) {
+        const logoSize = size * 0.2; // 20% of QR size
+        const x = (size - logoSize) / 2;
+        const y = (size - logoSize) / 2;
+        // Draw white rounded rect behind logo for contrast
+        const radius = 15;
+        ctx.fillStyle = lightColor;
+        roundRect(ctx, x, y, logoSize, logoSize, radius, true, false);
+
+        ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+      }
+    }
+
+    // Rounded rect helper
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      if (typeof r === 'undefined') r = 5;
+      if (typeof fill === 'undefined') fill = true;
+      if (typeof stroke === 'undefined') stroke = false;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // Draw live preview on input changes
+    [textInput, sizeInput, errorInput, colorDarkInput, colorLightInput].forEach(el => {
+      el.addEventListener('input', () => drawQR());
+    });
+
+    drawQR(); // Initial draw
+
+    // Save QR code to backend & get shareable URL
+    saveBtn.addEventListener('click', async () => {
+      const text = textInput.value.trim();
+      if (!text) {
+        alert('Please enter text or URL');
+        return;
+      }
+
+      const size = parseInt(sizeInput.value) || 300;
+      const options = {
+        errorCorrection: errorInput.value,
+        colorDark: colorDarkInput.value,
+        colorLight: colorLightInput.value,
+        size,
+      };
+
+      // Export canvas image as data URL
+      const imageDataUrl = canvas.toDataURL('image/png');
+
+      try {
+        const res = await fetch('https://qrcode-pph2.onrender.com/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, options, imageDataUrl }),
+        });
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+        if (data && data.shareUrl) {
+          shareLinkDiv.innerHTML = `Your QR code is saved. Shareable URL: <a href="${data.shareUrl}" target="_blank" rel="noopener">${data.shareUrl}</a>`;
+        } else {
+          shareLinkDiv.textContent = 'Unexpected response from server.';
+        }
+      } catch (err) {
+        shareLinkDiv.textContent = 'Error saving QR code: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
